@@ -1,7 +1,6 @@
 {
   "name": "waffle-batch",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "main": "./dist/lib/waffle-batch.umd.js",
   "module": "./dist/lib/waffle-batch.js",
@@ -20,6 +19,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:lib": "tsc -b && vite build --config vite.lib.config.ts",
+    "prepublishOnly": "npm run build:lib",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
