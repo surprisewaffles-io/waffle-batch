@@ -4,7 +4,7 @@ import type { MetricType } from './components/utils/analytics';
 import { useUrlState } from './hooks/useUrlState';
 import { LineChart } from '@waffle-charts/components/waffle/LineChart';
 import { BarChart } from '@waffle-charts/components/waffle/BarChart';
-import { Settings, BarChart2, TrendingUp, ArrowDownAZ, ArrowUpAZ } from 'lucide-react';
+import { Settings, BarChart2, TrendingUp, ArrowDownAZ, ArrowUpAZ, Link as LinkIcon } from 'lucide-react';
 import './index.css';
 
 // --- Mock Data Generation ---
@@ -74,6 +74,7 @@ const Checkbox = ({ checked, onChange, label }: { checked: boolean, onChange: (c
 function App() {
   const [sharedScale, setSharedScale] = useUrlState<boolean>('scale', true);
   const [showAxes, setShowAxes] = useUrlState<boolean>('axes', false);
+  const [isDrilldown, setIsDrilldown] = useUrlState<boolean>('drill', false);
   const [chartType, setChartType] = useUrlState<'line' | 'bar'>('chart', 'line');
   const [sortType, setSortType] = useUrlState<MetricType | 'max'>('sort', 'default');
   const [sortDirection, setSortDirection] = useUrlState<'asc' | 'desc'>('dir', 'desc');
@@ -144,6 +145,14 @@ function App() {
             checked={showAxes}
             onChange={(checked) => setShowAxes(checked)}
           />
+          <div className="flex items-center gap-2">
+            <Checkbox
+              label="Enable Drill-Down"
+              checked={isDrilldown}
+              onChange={(checked) => setIsDrilldown(checked)}
+            />
+            {isDrilldown && <LinkIcon className="w-3 h-3 text-indigo-500" />}
+          </div>
         </div>
 
         {/* Chart Type Control */}
@@ -207,6 +216,14 @@ function App() {
             searchable={true}
             query={searchQuery}
             onSearchChange={setSearchQuery}
+            onChartClick={isDrilldown ? (key) => {
+              // Parse "Region • Category" back to just "Region" if needed, 
+              // or simply pass the whole key if the dashboard supports generic filtering.
+              // For now, let's assume we want to filter by the Region part.
+              const region = key.split(' • ')[0];
+              const url = `https://mbuchthal.github.io/waffle-board/#/dashboard?region=${encodeURIComponent(region)}`;
+              window.open(url, '_blank');
+            } : undefined}
             sortConfig={{
               type: sortType === 'max'
                 ? (subset) => Math.max(...subset.map(d => d.revenue))
