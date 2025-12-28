@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Trellis, type SortConfig } from './components/Trellis';
+import { Trellis } from './components/Trellis';
 import type { MetricType } from './components/utils/analytics';
 import { LineChart } from '@waffle-charts/components/waffle/LineChart';
 import { BarChart } from '@waffle-charts/components/waffle/BarChart';

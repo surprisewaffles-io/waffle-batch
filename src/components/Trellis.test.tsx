@@ -12,7 +12,7 @@ vi.mock('react-intersection-observer', () => ({
 }));
 
 // Mock Chart Component
-const MockChart = ({ data, width, height, yDomain }: any) => (
+const MockChart = ({ data, yDomain }: any) => (
   <div data-testid="mock-chart">
     <span data-testid="chart-count">{data.length}</span>
     <span data-testid="chart-ydomain">{JSON.stringify(yDomain)}</span>

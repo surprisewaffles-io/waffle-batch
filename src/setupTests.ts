@@ -10,4 +10,4 @@ class IntersectionObserverMock {
 }
 
 vi.stubGlobal('IntersectionObserver', IntersectionObserverMock);
-window.IntersectionObserver = IntersectionObserverMock;
+window.IntersectionObserver = IntersectionObserverMock as any;
