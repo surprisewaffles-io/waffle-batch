@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Trellis } from './components/Trellis';
 import type { MetricType } from './components/utils/analytics';
 import { useUrlState } from './hooks/useUrlState';
 import { LineChart } from '@waffle-charts/components/waffle/LineChart';
 import { BarChart } from '@waffle-charts/components/waffle/BarChart';
 import { Settings, BarChart2, TrendingUp, ArrowDownAZ, ArrowUpAZ, Link as LinkIcon } from 'lucide-react';
+import { DetailModal } from './components/DetailModal';
 import './index.css';
 
 // --- Mock Data Generation ---
@@ -79,6 +80,7 @@ function App() {
   const [sortType, setSortType] = useUrlState<MetricType | 'max'>('sort', 'default');
   const [sortDirection, setSortDirection] = useUrlState<'asc' | 'desc'>('dir', 'desc');
   const [searchQuery, setSearchQuery] = useUrlState<string>('search', '');
+  const [selectedFacet, setSelectedFacet] = useState<{ key: string, data: SalesData[] } | null>(null);
 
   const ChartComponent = useMemo(() => {
     return (props: any) => {
@@ -216,14 +218,15 @@ function App() {
             searchable={true}
             query={searchQuery}
             onSearchChange={setSearchQuery}
-            onChartClick={isDrilldown ? (key) => {
-              // Parse "Region • Category" back to just "Region" if needed, 
-              // or simply pass the whole key if the dashboard supports generic filtering.
-              // For now, let's assume we want to filter by the Region part.
-              const region = key.split(' • ')[0];
-              const url = `https://mbuchthal.github.io/waffle-board/#/dashboard?region=${encodeURIComponent(region)}`;
-              window.open(url, '_blank');
-            } : undefined}
+            onChartClick={(key, data) => {
+              if (isDrilldown) {
+                const region = key.split(' • ')[0];
+                const url = `https://mbuchthal.github.io/waffle-board/#/dashboard?region=${encodeURIComponent(region)}`;
+                window.open(url, '_blank');
+              } else {
+                setSelectedFacet({ key, data });
+              }
+            }}
             sortConfig={{
               type: sortType === 'max'
                 ? (subset) => Math.max(...subset.map(d => d.revenue))
@@ -233,6 +236,25 @@ function App() {
           />
         </section>
       </main>
+
+      {/* Detail Modal */}
+      {selectedFacet && (
+        <DetailModal
+          isOpen={!!selectedFacet}
+          onClose={() => setSelectedFacet(null)}
+          title={selectedFacet.key}
+          data={selectedFacet.data}
+          ChartComponent={chartType === 'line' ? LineChart : BarChart}
+          commonProps={{
+            yKey: "revenue",
+            xKey: "date",
+            lineColor: "#6366f1",
+            areaColor: "text-indigo-500",
+            barColor: "#8b5cf6",
+            tickFormat: (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short' })
+          }}
+        />
+      )}
     </div>
   );
 }
