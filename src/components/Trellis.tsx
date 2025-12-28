@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useInView } from 'react-intersection-observer';
 import { Search } from 'lucide-react';
-import { calculateMetric, type MetricType } from './utils/analytics';
+import { calculateMetric, type MetricType } from './utils/analytics.js';
 
 export function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -48,6 +48,8 @@ export type TrellisProps<T> = {
   query?: string;
   /** Callback when search input changes. Required if query is provided. */
   onSearchChange?: (query: string) => void;
+  /** Optional callback when a chart is clicked */
+  onChartClick?: (key: string, data: T[]) => void;
   sortConfig?: SortConfig<T>;
 };
 
@@ -69,6 +71,7 @@ const TrellisItem = <T,>({
   SkeletonComponent = DefaultSkeleton,
   height,
   yDomain,
+  onClick,
 }: {
   facetKey: string;
   data: T[];
@@ -76,19 +79,38 @@ const TrellisItem = <T,>({
   SkeletonComponent?: React.ComponentType<{ height: number }>;
   height: number;
   yDomain?: [number, number];
+  onClick?: (key: string, data: T[]) => void;
 }) => {
   const { ref, inView } = useInView({
     triggerOnce: true,
     rootMargin: '200px 0px',
   });
 
+  const isClickable = !!onClick;
+
   return (
     <div
       ref={ref}
-      className="flex flex-col border border-canvas-border rounded-lg p-4 bg-canvas-subtle/30 transition-opacity duration-500"
+      onClick={() => isClickable && onClick(facetKey, data)}
+      onKeyDown={(e) => {
+        if (isClickable && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onClick(facetKey, data);
+        }
+      }}
+      role={isClickable ? "button" : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      className={cn(
+        "flex flex-col border border-canvas-border rounded-lg p-4 bg-canvas-subtle/30 transition-all duration-300",
+        isClickable && "cursor-pointer hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100 hover:shadow-md active:scale-[0.99]"
+      )}
       style={{ opacity: inView ? 1 : 0.6 }}
     >
-      <h3 className="text-sm font-medium mb-4 text-canvas-fg/70 truncate" title={facetKey}>{facetKey}</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-medium text-canvas-fg/70 truncate" title={facetKey}>{facetKey}</h3>
+        {isClickable && <div className="text-xs text-indigo-400/0 group-hover:text-indigo-500/100 transition-opacity">↗</div>}
+      </div>
+
       <div style={{ height, position: 'relative' }}>
         {inView ? (
           <ChartComponent
@@ -119,6 +141,7 @@ export function Trellis<T>({
   searchable,
   query,
   onSearchChange,
+  onChartClick,
   sortConfig = { type: 'default', direction: 'asc' }, // Default sort
 }: TrellisProps<T>) {
   // Use internal state if not controlled, otherwise use prop
@@ -249,6 +272,7 @@ export function Trellis<T>({
               SkeletonComponent={SkeletonComponent}
               height={height}
               yDomain={globalYDomain}
+              onClick={onChartClick}
             />
           ))}
         </div>
