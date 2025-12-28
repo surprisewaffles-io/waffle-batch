@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { DetailModal } from './DetailModal';
 
 // Mock Chart Comp
-const MockChart = ({ data, showXAxis, ...props }: any) => (
+const MockChart = ({ data, showXAxis }: any) => (
   <div data-testid="mock-chart">
     Chart with {data.length} items.
     Axis: {showXAxis ? 'Visible' : 'Hidden'}
