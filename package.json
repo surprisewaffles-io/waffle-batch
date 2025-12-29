@@ -1,15 +1,15 @@
 {
   "name": "waffle-batch",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
-  "main": "./dist/lib/waffle-batch.umd.js",
+  "main": "./dist/lib/waffle-batch.cjs",
   "module": "./dist/lib/waffle-batch.js",
   "types": "./dist/lib/src/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/lib/src/index.d.ts",
       "import": "./dist/lib/waffle-batch.js",
-      "require": "./dist/lib/waffle-batch.umd.cjs"
+      "require": "./dist/lib/waffle-batch.cjs"
     }
   },
   "files": [
